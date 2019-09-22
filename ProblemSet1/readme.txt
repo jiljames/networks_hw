@@ -14,7 +14,7 @@
 
 
 
-        For the network update method:
+        Implementation of network update method:
 
         My implementation relies on a bad_destination table that this class
         keeps track of to allow for the propagation of news about bad nodes.
