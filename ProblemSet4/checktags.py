@@ -18,8 +18,14 @@ def checkURL(url):
     """Checks whether the tags are balanced in the specified URL."""
     try:
         response = urllib.request.urlopen(url)
-    except urllib.error.URLError: 
-        print("Not a valid URL. Response status: ", response.getcode())
+    except urllib.error.URLError as e: 
+        print("An error occurred while accessing this URL.")
+        print("Response status: ", e.code)
+        print("Reason for failure given: ", e.reason)
+        sys.exit(-1)
+    except ValueError:
+        print("This URL is of an unknown type: ")
+        print(url)
         sys.exit(-1)
     print(type(response))
     parser = HTMLTagParser()
