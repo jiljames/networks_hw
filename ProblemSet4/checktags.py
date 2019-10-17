@@ -5,7 +5,7 @@ This program checks that tags are properly matched in an HTML file.
 This version of the program runs in Python; the checktags version runs
 directly from the command line.
 """
-
+import sys
 import html.parser
 import urllib.request
 
@@ -16,7 +16,11 @@ def CheckTags():
 
 def checkURL(url):
     """Checks whether the tags are balanced in the specified URL."""
-    response = urllib.request.urlopen(url)
+    try:
+        response = urllib.request.urlopen(url)
+    except urllib.error.URLError: 
+        print("Not a valid URL. Response status: ", response.getcode())
+        sys.exit(-1)
     print(type(response))
     parser = HTMLTagParser()
     parser.checkTags(response.read().decode("UTF-8"))
