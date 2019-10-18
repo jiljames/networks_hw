@@ -20,8 +20,11 @@ def checkURL(url):
         response = urllib.request.urlopen(url)
     except urllib.error.URLError as e: 
         print("An error occurred while accessing this URL.")
-        print("Response status: ", e.code)
-        print("Reason for failure given: ", e.reason)
+        try:
+            print("Response status: ", e.code)
+            print("Reason for failure given: ", e.reason)
+        except:
+            print("No failure status for this error.")
         sys.exit(-1)
     except ValueError:
         print("Consider using http. This URL is of an unknown type: ")
