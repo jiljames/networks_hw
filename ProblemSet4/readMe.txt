@@ -17,8 +17,8 @@ On the webpage http://people.reed.edu/~agroce/index.html
 
 
 On the webpage http://people.reed.edu/~agroce/teaching.html
-	it says the following are broken links:
-	http://www.saintannsny.org/ in <a> tag at line 67		(This one is not actually broken)*
+	it says the following are broken links and all but one are actually broken:
+	http://www.saintannsny.org/ in <a> tag at line 67 (This one is not actually broken)*
 	http://www.cs.umd.edu/class/fall2008/cmsc250/ in <a> tag at line 66
 	http://www.cs.umd.edu/class/spring2009/cmsc351/ in <a> tag at line 65
 	http://www.academicchallenge.org in <a> tag at line 63
@@ -27,6 +27,6 @@ On the webpage http://people.reed.edu/~agroce/teaching.html
 	<urlopen error [Errno 8] nodename nor servname provided, or not known> but it is up.
 
 On the webpage http://people.reed.edu/~esroberts/
-	It says the following link is broken:
+	It says the following link is broken but it is not:
 	mailto:eroberts@cs.stanford.edu
 	I'm not sure how to handle these kinds of links.
