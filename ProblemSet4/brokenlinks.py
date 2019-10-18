@@ -6,14 +6,16 @@ This program checks an HTML file for broken links
 import sys
 import html.parser
 import urllib.request
+import ssl
 
 def CheckTags():
-    """Reads a URL from the user and then checks it for tag matching."""
+    """Reads a URL from the user and then checks it for broken links."""
     url = input("URL: ")
     checkURL(url)
 
+
 def checkURL(url):
-    """Checks whether the tags are balanced in the specified URL."""
+    """Checks whether the links are broken in an HTML file."""
     try:
         response = urllib.request.urlopen(url)
     except urllib.error.URLError as e: 
@@ -22,11 +24,12 @@ def checkURL(url):
         print("Reason for failure given: ", e.reason)
         sys.exit(-1)
     except ValueError:
-        print("This URL is of an unknown type: ")
+        print("Consider using http. This URL is of an unknown type: ")
         print(url)
         sys.exit(-1)
     parser = BrokenLinksParser(url)
     parser.checkTags(response.read().decode("UTF-8"))
+
 
 class BrokenLinksParser(html.parser.HTMLParser):
 
@@ -36,12 +39,18 @@ class BrokenLinksParser(html.parser.HTMLParser):
     """
 
     def __init__(self, url):
-        """Creates a new HTMLTagParser object."""
+        """Creates a new BrokenLinksParser object."""
         html.parser.HTMLParser.__init__(self)
-        self.origin = url
+        # Prepare our base url
+        if url.endswith(".html"):
+            url = url[:url.rfind("/")]
+        if url[-1] != "/":
+            url+= "/"
+        self.base = url
 
-    def checkTags(self, text):
-        """Checks that the tags are balanced in the supplied text."""
+
+    def checkLinks(self, text):
+        """Checks that the links aren't broken."""
         self._stack = [ ]
         self.feed(text)
         while len(self._stack) > 0:
@@ -49,21 +58,27 @@ class BrokenLinksParser(html.parser.HTMLParser):
             print("Broken link " + link + " in <" + startTag +
                   "> tag at line " + str(startLine))
 
+
     def handle_starttag(self, startTag, attributes):
         """Overrides the callback function for start tags."""
         startLine,_ = self.getpos()
         for (k,v) in attributes:
             if k == "href" or k=="src":
-                if "://" not in v:
-                    v = self.origin + v
+                if "://" not in v and not v.startswith("mailto:"):
+                    v = self.base + v
+                # Handle security check in case of https
+                ctx = ssl.create_default_context()s
+                ctx.check_hostname = False
+                ctx.verify_mode = ssl.CERT_NONE
                 try:
-                    response = urllib.request.urlopen(v)
-                except:
+                    response = urllib.request.urlopen(v,context=ctx)
+                except urllib.error.URLError as e:
                     self._stack.append((startTag, v, startLine))
+
 
 
 
 # Startup code
 
 if __name__ == "__main__":
-    CheckTags()
+    CheckLinks()
