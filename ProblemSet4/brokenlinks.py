@@ -8,7 +8,7 @@ import html.parser
 import urllib.request
 import ssl
 
-def CheckTags():
+def CheckLinks():
     """Reads a URL from the user and then checks it for broken links."""
     url = input("URL: ")
     checkURL(url)
@@ -28,7 +28,7 @@ def checkURL(url):
         print(url)
         sys.exit(-1)
     parser = BrokenLinksParser(url)
-    parser.checkTags(response.read().decode("UTF-8"))
+    parser.checkLinks(response.read().decode("UTF-8"))
 
 
 class BrokenLinksParser(html.parser.HTMLParser):
@@ -67,7 +67,7 @@ class BrokenLinksParser(html.parser.HTMLParser):
                 if "://" not in v and not v.startswith("mailto:"):
                     v = self.base + v
                 # Handle security check in case of https
-                ctx = ssl.create_default_context()s
+                ctx = ssl.create_default_context()
                 ctx.check_hostname = False
                 ctx.verify_mode = ssl.CERT_NONE
                 try:
