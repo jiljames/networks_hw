@@ -8,6 +8,11 @@ import html.parser
 import urllib.request
 import ssl
 
+# Handle security check in case of https
+CTX = ssl.create_default_context()
+CTX.check_hostname = False
+CTX.verify_mode = ssl.CERT_NONE
+
 def CheckLinks():
     """Reads a URL from the user and then checks it for broken links."""
     url = input("URL: ")
@@ -17,7 +22,8 @@ def CheckLinks():
 def checkURL(url):
     """Checks whether the links are broken in an HTML file."""
     try:
-        response = urllib.request.urlopen(url)
+        # Try and access link while handling security check
+        response = urllib.request.urlopen(url, context = CTX)
     except urllib.error.URLError as e: 
         print("An error occurred while accessing this URL.")
         try:
@@ -56,6 +62,8 @@ class BrokenLinksParser(html.parser.HTMLParser):
         """Checks that the links aren't broken."""
         self._stack = [ ]
         self.feed(text)
+        if len(self._stack) == 0:
+            print("No broken links found.")
         while len(self._stack) > 0:
             startTag,link,startLine = self._stack.pop()
             print("Broken link " + link + " in <" + startTag +
@@ -67,14 +75,16 @@ class BrokenLinksParser(html.parser.HTMLParser):
         startLine,_ = self.getpos()
         for (k,v) in attributes:
             if k == "href" or k=="src":
+                #Take care of a few edge cases
+                if v.startswith("www."):
+                    v = "http://" + v
+                if v.startswith("//"):
+                    v = "http:" + v
                 if "://" not in v and not v.startswith("mailto:"):
                     v = self.base + v
-                # Handle security check in case of https
-                ctx = ssl.create_default_context()
-                ctx.check_hostname = False
-                ctx.verify_mode = ssl.CERT_NONE
+                # Now try to access the url / handle security check
                 try:
-                    response = urllib.request.urlopen(v,context=ctx)
+                    response = urllib.request.urlopen(v,context=CTX)
                 except urllib.error.URLError as e:
                     self._stack.append((startTag, v, startLine))
 
