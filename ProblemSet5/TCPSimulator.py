@@ -157,7 +157,8 @@ class TCPServer:
 
         self.seq = p.ack
         self.ack = p.seq + len(p.data)
-        self.received.append((self.ack, p.data))
+        if (self.ack, p.data) not in self.received:
+            self.received.append((self.ack, p.data))
         if p.FIN:
             self.receivedFIN = True
         
@@ -170,10 +171,14 @@ class TCPServer:
             for _, data in self.received:
                 self.msgBytes.extend(data)
             reply.FIN = True
+            e = ReceivePacketEvent(self.client, reply)
+            eventQueue.enqueue(e, t + TRANSMISSION_DELAY)
             print("Server receives \"" + self.msgBytes.decode("UTF-8") + "\"")
             self.resetForNextMessage()
-        e = ReceivePacketEvent(self.client, reply)
-        eventQueue.enqueue(e, t + TRANSMISSION_DELAY)
+        else:
+            if random.random() > LOST_PACKET_PROBABILITY:
+                e = ReceivePacketEvent(self.client, reply)
+                eventQueue.enqueue(e, t + TRANSMISSION_DELAY)
 
     def resetForNextMessage(self):
         """Initializes the data structures for holding the message."""
@@ -181,6 +186,7 @@ class TCPServer:
         self.ack = 0
         self.received = []
         self.receivedFIN = False
+
 
 
 
